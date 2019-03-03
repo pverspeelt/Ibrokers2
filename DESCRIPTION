@@ -1,14 +1,17 @@
 Package: Ibrokers2
-Title: What the Package Does (One Line, Title Case)
+Title: R API to Interactive Brokers
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "First",
            family = "Last",
            role = c("aut", "cre"),
            email = "first.last@example.com")
-Description: What the package does (one paragraph).
+Description: Provides a native R access to Interactive Brokers via the Interactive Brokers API.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Suggests: 
     testthat
+RoxygenNote: 6.1.1
+Imports: 
+    glue
