@@ -1,5 +1,6 @@
 # The known server versions ----------
 
+#' @export
 `.server_version` <- 
   structure(
     list(
@@ -90,6 +91,7 @@
   )
 
 # client versions ----------
+#' @export 
 `.client_version` <- 
   structure(
     list(

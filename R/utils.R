@@ -8,9 +8,9 @@
 #' @examples
 #' print(tws_con)
 print.tws_con <- function(x, ...) {
-  if( isOpen(x[[1]])) {
+  if( isOpen(x[["con"]])) {
     cat('<tws_connection,',x$clientId,' @ ',
-        as.character(x$connected.at),', nextId=',x$nextValidId,'>\n', sep="")
+        as.character(x$connected.at),'>\n', sep="")
   } else
     cat('<tws_connection, CLOSED>\n')
 }

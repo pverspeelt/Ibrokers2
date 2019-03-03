@@ -1,7 +1,28 @@
+#' Establish a connection to TWS
+#'
+#' @param clientId 
+#' @param host 
+#' @param port 
+#' @param verbose 
+#' @param timeout 
+#' @param filename 
+#' @param blocking 
+#'
+#' @return A tws_con object.
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' tws <- tws_connect()
+#' tws_disconnect(tws)
+#' }
 tws_connect <-
   function (clientId = 1L, host = "localhost", port = 7496, verbose = TRUE,
             timeout = 5, filename = NULL, blocking = .Platform$OS.type ==
               "windows") {
+    # TODO: documentation
+    # TODO: tests
+    
     
     # from ib_insync
     # MaxClientVersion = 148
@@ -50,10 +71,11 @@ tws_connect <-
     {
       # if (!is.tws_connection(conn))
       #   stop("requires tws_conection object")
-      con <- open_connection[["sock_con"]]
+      con <- open_connection[["con"]]
       
       VERSION <- "2"
       START_API <- .twsOutgoingMSG$START_API
+      
       writeBin(START_API, con) 
       writeBin(VERSION, con)
       writeBin(as.character(clientId), con)
@@ -148,10 +170,15 @@ tws_connect <-
   }
 
 
+#' @rdname tws_connect
+#' @export
 is_tws_connection <- function(x) {
   inherits(x, "tws_con")
 }
 
+
+#' @rdname tws_connect
+#' @export
 tws_disconnect <- function(tws_con) {
   if(!is_tws_connection(tws_con))
     stop("not a 'tws' connection")

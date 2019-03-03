@@ -1,5 +1,7 @@
 
 # incoming msg id's ----------
+
+#' @export 
 `.twsIncomingMSG` <-
   structure(
     list(
@@ -82,6 +84,8 @@
     )
 
 # outgoing msg id's ----------
+
+#' @export 
 `.twsOutgoingMSG` <-
   structure(
     list(
