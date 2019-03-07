@@ -4,6 +4,7 @@
 \alias{tws_connect}
 \alias{is_tws_connection}
 \alias{tws_disconnect}
+\alias{is_tws_connected}
 \title{Establish a connection to TWS}
 \usage{
 tws_connect(clientId = 1L, host = "localhost", port = 7496,
@@ -13,6 +14,8 @@ tws_connect(clientId = 1L, host = "localhost", port = 7496,
 is_tws_connection(x)
 
 tws_disconnect(tws_con)
+
+is_tws_connected(tws_con)
 }
 \arguments{
 \item{clientId}{}
