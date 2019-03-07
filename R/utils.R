@@ -17,8 +17,8 @@ print.tws_con <- function(x, ...) {
 }
 
 #' @keywords internal
-is_tws_connection_open <- function(con) {
-  if(inherits(try(isOpen(con), silent=TRUE), 'try-error')) {
+is_tws_connection_open <- function(tws_con) {
+  if(inherits(try(isOpen(tws_con$con), silent=TRUE), 'try-error')) {
     FALSE
   } else TRUE 
 }

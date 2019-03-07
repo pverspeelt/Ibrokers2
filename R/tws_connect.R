@@ -139,9 +139,9 @@ tws_connect <-
       tws_con$clientId <- clientId
       #tws_con$nextValidId <- NEXT_VALID_ID
       tws_con$port <- port
-      tws_con$server_version <- SERVER_VERSION
+      tws_con$server_version <- as.numeric(SERVER_VERSION)
       tws_con$connected_at <- CONNECTION_TIME
-      tws_con$connected <- is_connection_open(tws_con$con)
+      tws_con$connected <- is_tws_connection_open(tws_con$con)
       class(tws_con) <- c("tws_con", "environment")
 
       # tws needs an API call now
@@ -190,7 +190,10 @@ tws_disconnect <- function(tws_con) {
   if (is_tws_connection_open(tws_con)) {
     tws_con$connected <- FALSE
     tws_con$connected_at <- NULL
+    tws_con$server_version <- 0
+    tws_con$clientId <- -1L
     close(tws_con$con)
+    glue("The connection to tws is now closed")
   } else {
     glue("The connection to tws is already closed.")
   }
