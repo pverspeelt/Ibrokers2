@@ -18,7 +18,13 @@ print.tws_con <- function(x, ...) {
 
 #' @keywords internal
 is_tws_connection_open <- function(tws_con) {
-  if(inherits(try(isOpen(tws_con$con), silent=TRUE), 'try-error')) {
+  if (inherits(try(isOpen(tws_con$con), silent=TRUE), 'try-error')) {
     FALSE
   } else TRUE 
 }
+
+#' @keywords internal
+make_field <- function(x) {
+  if (is.null(x) || length(x) != 1L || is.na(x)) '' else as.character(x)
+}
+

@@ -1,11 +1,12 @@
 #' Establish a connection to TWS
 #'
 #' @param clientId 
-#' @param host 
-#' @param port 
+#' @param host Default connection is 127.0.0.1 for the trade work station
+#' @param port Default connection is to the paper trading account on port 7497.
+#' Live connection to tws is on port 7496. For the IB gateway the live port is 4001 
+#' and the paper trading port is 4002.
 #' @param verbose 
 #' @param timeout 
-#' @param filename 
 #' @param blocking 
 #'
 #' @return A tws_con object.
@@ -17,9 +18,9 @@
 #' tws_disconnect(tws)
 #' }
 tws_connect <-
-  function (clientId = 1L, host = "localhost", port = 7496, verbose = TRUE,
-            timeout = 5, filename = NULL, blocking = .Platform$OS.type ==
-              "windows") {
+  function (clientId = 1L, host = "127.0.0.1", port = 7497, verbose = TRUE,
+            timeout = 5, blocking = .Platform$OS.type == "windows") {
+    
     # TODO: documentation
     # TODO: tests
     
@@ -86,20 +87,17 @@ tws_connect <-
     
     if (is.null(getOption("digits.secs"))) 
       options(digits.secs = 6)
-    if (is.character(clientId))
-      filename <- clientId
-    
+
     # open connection ----------
-    if (is.null(filename)) {
-      start.time <- Sys.time()
-      sock_con <- socketConnection(host = host, port = port, open = "ab",
+    start.time <- Sys.time()
+    sock_con <- socketConnection(host = host, port = port, open = "ab",
                             blocking = blocking)
-      on.exit(close(sock_con))
+    on.exit(close(sock_con))
       
-      if (!isOpen(sock_con)) {
-        close(sock_con)
-        stop(paste("couldn't connect to TWS on port", port))
-      }
+    if (!isOpen(sock_con)) {
+      close(sock_con)
+      stop(glue("couldn't connect to TWS on port: {port}"), call. = FALSE)
+    }
       
       # TODO: sending client version v100Plus protocol
       # can this be used with R?
@@ -112,65 +110,51 @@ tws_connect <-
       # 
      
       
-      CLIENT_VERSION <- "66"
-      writeBin(c(CLIENT_VERSION), sock_con)
+    CLIENT_VERSION <- "66"
+    writeBin(CLIENT_VERSION, sock_con)
       
-      SERVER_VERSION <- NEXT_VALID_ID <- CONNECTION_TIME <- NULL
+    SERVER_VERSION <- NEXT_VALID_ID <- CONNECTION_TIME <- NULL
       # Server Version and connection time
-      while (TRUE) {
-        if (!is.null(CONNECTION_TIME))
-          break
-        if (!socketSelect(list(sock_con), FALSE, 0.1))
-          next
-        curMsg <- readBin(sock_con, character(), 2L)
-        #cat(curMsg,'\n')
+    while (TRUE) {
+      if (!is.null(CONNECTION_TIME))
+        break
+      if (!socketSelect(list(sock_con), FALSE, 0.1))
+        next
+      curMsg <- readBin(sock_con, character(), 2L)
+      #cat(curMsg,'\n')
         
-        if (is.null(SERVER_VERSION)) {
-          SERVER_VERSION <- curMsg[1]
-          CONNECTION_TIME <- curMsg[2]
-          next
-        }
+      if (is.null(SERVER_VERSION)) {
+        SERVER_VERSION <- curMsg[1]
+        CONNECTION_TIME <- curMsg[2]
+        next
       }
       
-      on.exit() # connection succeeded
-      
-      tws_con <- new.env()
-      tws_con$con <- sock_con
-      tws_con$clientId <- clientId
-      #tws_con$nextValidId <- NEXT_VALID_ID
-      tws_con$port <- port
-      tws_con$server_version <- as.integer(SERVER_VERSION)
-      tws_con$connected_at <- CONNECTION_TIME
-      tws_con$connected <- is_tws_connection_open(tws_con$con)
-      class(tws_con) <- c("tws_con", "environment")
-
-      # tws needs an API call now
-      start_api(tws_con, clientId)  
-
-      # TODO: Get the NEXT_VALID_ID.
-      # tws_con$nextValidId <- NEXT_VALID_ID <- as.integer(reqIds(tws_con, 1))
-
-      return(tws_con)
-      } else {
-        fh <- file(filename, open = "r")
-        dat <- scan(fh, what = character(), quiet = TRUE)
-        close(fh)
-        tmp <- tempfile()
-        fh <- file(tmp, open = "ab")
-        writeBin(dat, fh)
-        close(fh)
-        s <- file(tmp, open = "rb")
-        tws_con <- new.env()
-        tws_con$con <- s
-        tws_con$clientId <- NULL
-        tws_con$nextValidId <- NULL
-        tws_con$port <- NULL
-        tws_con$server_version <- NULL
-        tws_con$connected_at <- filename
-        class(tws_con) <- c("tws_playblack", "tws_con", "environment")
-        return(tws_con)
+      if (Sys.time()-start.time > timeout) {
+        close(s)
+        stop('tws connection timed-out')
       }
-  }
+    }
+      
+    on.exit() # connection succeeded
+      
+    tws_con <- new.env()
+    tws_con$con <- sock_con
+    tws_con$clientId <- clientId
+    #tws_con$nextValidId <- NEXT_VALID_ID
+    tws_con$port <- port
+    tws_con$server_version <- as.integer(SERVER_VERSION)
+    tws_con$connected_at <- CONNECTION_TIME
+    tws_con$connected <- is_tws_connection_open(tws_con$con)
+    class(tws_con) <- c("tws_con", "environment")
+
+    # tws needs an API call now
+    start_api(tws_con, clientId)  
+
+    # TODO: Get the NEXT_VALID_ID.
+    tws_con$nextValidId <- reqIds(tws_con, 1)
+
+    return(tws_con)
+}
 
 
 #' @rdname tws_connect
@@ -192,6 +176,7 @@ tws_disconnect <- function(tws_con) {
     tws_con$connected_at <- NULL
     tws_con$server_version <- 0L
     tws_con$clientId <- -1L
+    tws_con$nextvalidId <- 0L
     close(tws_con$con)
     glue("The connection to tws is now closed")
   } else {

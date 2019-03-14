@@ -7,9 +7,9 @@
 \alias{is_tws_connected}
 \title{Establish a connection to TWS}
 \usage{
-tws_connect(clientId = 1L, host = "localhost", port = 7496,
-  verbose = TRUE, timeout = 5, filename = NULL,
-  blocking = .Platform$OS.type == "windows")
+tws_connect(clientId = 1L, host = "127.0.0.1", port = 7497,
+  verbose = TRUE, timeout = 5, blocking = .Platform$OS.type ==
+  "windows")
 
 is_tws_connection(x)
 
@@ -20,15 +20,15 @@ is_tws_connected(tws_con)
 \arguments{
 \item{clientId}{}
 
-\item{host}{}
+\item{host}{Default connection is 127.0.0.1 for the trade work station}
 
-\item{port}{}
+\item{port}{Default connection is to the paper trading account on port 7497.
+Live connection to tws is on port 7496. For the IB gateway the live port is 4001 
+and the paper trading port is 4002.}
 
 \item{verbose}{}
 
 \item{timeout}{}
-
-\item{filename}{}
 
 \item{blocking}{}
 }
