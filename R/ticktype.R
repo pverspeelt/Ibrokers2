@@ -2,7 +2,6 @@
 
 #' @export
 `.tick_type` <- 
-  structure(
     list(
       BID_SIZE = 0L,
       BID = 1L,
@@ -96,7 +95,6 @@
       SHORTABLE_SHARES = 89L,
       NOT_SET = 90L
     )
-  )
 
 
 

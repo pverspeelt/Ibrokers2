@@ -2,7 +2,6 @@
 
 #' @export
 `.server_version` <- 
-  structure(
     list(
       MIN_SERVER_VER_PTA_ORDERS             = 39L,
       MIN_SERVER_VER_FUNDAMENTAL_DATA       = 40L,
@@ -88,14 +87,11 @@
       MIN_SERVER_VER_REMOVE_NULL_ALL_CASTING  = 147L,
       MIN_SERVER_VER_D_PEG_ORDERS             = 148L
     )
-  )
 
 # client versions ----------
 #' @export 
 `.client_version` <- 
-  structure(
     list(
       MIN_CLIENT_VER = 100L,
       MAX_CLIENT_VER = .server_version$MIN_SERVER_VER_D_PEG_ORDERS
       )
-    )
