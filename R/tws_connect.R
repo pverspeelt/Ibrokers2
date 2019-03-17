@@ -146,11 +146,13 @@ tws_connect <-
     tws_con$connected_at <- CONNECTION_TIME
     tws_con$connected <- is_tws_connection_open(tws_con$con)
     class(tws_con) <- c("tws_con", "environment")
-
+    
     # tws needs an API call now
     start_api(tws_con, clientId)  
 
     # TODO: Get the NEXT_VALID_ID.
+    Sys.sleep(5)
+    req_managed_accounts(tws_con)
     tws_con$nextValidId <- reqIds(tws_con, 1)
 
     return(tws_con)
@@ -191,7 +193,7 @@ is_tws_connected <- function(tws_con){
     stop("not a 'tws' connection", call. = FALSE)
   }
   
-  if (is_tws_connection_open(tws_con$con)){
+  if (is_tws_connection_open(tws_con)){
     glue("connection to tws is open and was opened at: {tws_con$connected_at}.")
   } else {
     glue("connection to tws is closed.")

@@ -21,16 +21,29 @@ eWrapper <- function() {
   # }
   
   # create eWrapper functions ----------  
-  errorMessage <- function(curMsg, msg, timestamp, file, tws_con, ...) {
-    if (msg[3] == "1100")
+  error_messages <- function(curMsg, msg, timestamp, file, tws_con, ...) {
+    count <- counter()
+    version <- as.integer(msg[count()])
+    id <- as.integer(msg[count()])
+    error_code <- as.integer(msg[count()])
+    error_message <- msg[count()]
+                             
+    if (error_code == 1100)
       tws_con$connected <- FALSE
-    if (msg[3] %in% c("1101", "1102"))
+    if (error_code %in% c(1101, 1102))
       tws_con$connected <- TRUE
-    cat("TWS Message:", msg, "\n")
+    glue("TWS message: {error_code} - {error_message}")
   }
   
   nextValidId <- function(curMsg, msg, ...) {
     as.integer(msg[2])
+  }
+  
+  managed_accounts <- function(curMsg, msg, ...) {
+    count <- counter()
+    version <- as.integer(msg[count()])
+    accounts <- unlist(strsplit(msg[count()], split = ",", fixed = TRUE))
+    accounts
   }
   
   
@@ -40,8 +53,9 @@ eWrapper <- function() {
     # get.Data = get.Data,
     # assign.Data = assign.Data,
     # remove.Data = remove.Data,
-    errorMessage = errorMessage,
-    nextValidId  =  nextValidId
+    error_messages = error_messages,
+    nextValidId  =  nextValidId,
+    managed_accounts = managed_accounts
   )
   
   class(eW) <- "eWrapper"
