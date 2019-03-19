@@ -33,14 +33,14 @@ req_managed_accounts <- function(con) {
     socketSelect(list(con), FALSE, 0.1)
     curMsg <- readBin(con, "character", 1)
     managed_accounts <- process_messages(curMsg, con, eWrapper = ew)
-    print(managed_accounts)
     if (curMsg == .twsIncomingMSG$MANAGED_ACCTS)
       break
   }
   
   if (length(managed_accounts) > 1) {
-    warning(glue('Your TWS user name handles {length(managed_accounts)} accounts.',
-                 'Any order you place needs to specify an account Id'), call. = FALSE)
+    print(glue('Your TWS user name handles {length(managed_accounts)} accounts.',
+                 ' Read the documentation with the req_managed_accounts function.'))
   }
-  glue("you are connected to account: {managed_accounts}")
+  print(glue("you are connected to account: {managed_accounts}"))
+  managed_accounts
 }

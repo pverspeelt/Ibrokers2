@@ -8,12 +8,11 @@
 #' @examples
 #' print(tws_con)
 print.tws_con <- function(x, ...) {
-  # TODO: rewrite to use glue and is_tws_connection_open
-  if (isOpen(x[["con"]])) {
-    cat('<tws_connection,',x$clientId,' @ ',
-        as.character(x$connected.at),'>\n', sep="")
+  if (is_tws_connection_open(x)) {
+    print(glue('A tws connection with clientId {x$clientId},',
+    ' connected at {x$connected_at}.'))
   } else
-    cat('<tws_connection, CLOSED>\n')
+    print(glue('A closed tws connection.'))
 }
 
 #' @keywords internal
