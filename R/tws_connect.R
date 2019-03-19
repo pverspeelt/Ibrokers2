@@ -23,7 +23,10 @@ tws_connect <-
     
     # TODO: documentation
     # TODO: tests
-    
+
+    # switch to reticulate and use the python interface? 
+    # python works very fast and is async.
+    # use promises in combination with future to create an async in R?
     
     # from ib_insync
     # MaxClientVersion = 148
@@ -59,28 +62,32 @@ tws_connect <-
     # 
     # v100prefix = "API\0"
     # v100version = "v%d..%d" % (MIN_CLIENT_VER, MAX_CLIENT_VER)
-    # #v100version = "v%d..%d" % (MIN_CLIENT_VER, 101)
     # msg = comm.make_msg(v100version)
     # logger.debug("msg %s", msg)
     # msg2 = str.encode(v100prefix, 'ascii') + msg
     # logger.debug("REQUEST %s", msg2)
     # self.conn.sendMsg(msg2)
   
-    
-    start_api <- function (open_connection, clientId)
-      # needs to write start_api, version, clientid 
-      # question, send 3 writes or just 1?
-    {
-      # if (!is.tws_connection(conn))
-      #   stop("requires tws_conection object")
-      con <- open_connection[["con"]]
+
+    # ibapi needs an api trigger    
+    start_api <- function(tws_con, clientId) {
+
+      con <- tws_con$con
       
+      # connectOptions for now empty
+      # + PACEAPI flag under review
+      optCapab <- ""
+
       VERSION <- "2"
-      START_API <- .twsOutgoingMSG$START_API
       
-      writeBin(START_API, con) 
-      writeBin(VERSION, con)
-      writeBin(as.character(clientId), con)
+      out_msg <- c(.twsOutgoingMSG$START_API, 
+                   VERSION,
+                   make_field(clientId))
+      if (tws_con$server_version > .server_version$MIN_SERVER_VER_OPTIONAL_CAPABILITIES) {
+        out_msg <- c(out_msg, make_field(optCapab))
+      }
+      
+      writeBin(out_msg, con)
     }
     
     
@@ -109,7 +116,7 @@ tws_connect <-
       # 
       # 
      
-      
+    # send client version and receive server version  
     CLIENT_VERSION <- "66"
     writeBin(CLIENT_VERSION, sock_con)
       
@@ -120,7 +127,7 @@ tws_connect <-
         break
       if (!socketSelect(list(sock_con), FALSE, 0.1))
         next
-      curMsg <- readBin(sock_con, character(), 2L)
+      curMsg <- readBin(sock_con, "character", 2L)
       #cat(curMsg,'\n')
         
       if (is.null(SERVER_VERSION)) {
@@ -130,7 +137,7 @@ tws_connect <-
       }
       
       if (Sys.time()-start.time > timeout) {
-        close(s)
+        close(sock_con)
         stop('tws connection timed-out')
       }
     }
@@ -140,7 +147,6 @@ tws_connect <-
     tws_con <- new.env()
     tws_con$con <- sock_con
     tws_con$clientId <- clientId
-    #tws_con$nextValidId <- NEXT_VALID_ID
     tws_con$port <- port
     tws_con$server_version <- as.integer(SERVER_VERSION)
     tws_con$connected_at <- CONNECTION_TIME
@@ -150,11 +156,34 @@ tws_connect <-
     # tws needs an API call now
     start_api(tws_con, clientId)  
 
-    # TODO: Get the NEXT_VALID_ID.
-    Sys.sleep(5)
-    req_managed_accounts(tws_con)
-    tws_con$nextValidId <- reqIds(tws_con, 1)
+    # pause a bit 
+    Sys.sleep(1)
 
+    # read and process connection messages ----------
+    eW <- eWrapper()
+    while (TRUE) {
+      if (socketSelect(list(sock_con), FALSE, 1)) {
+        curMsg <- readBin(sock_con, "character", 1)
+        if (curMsg == .twsIncomingMSG$MANAGED_ACCTS) {
+        tws_con$accounts <- process_messages(curMsg, sock_con, eW)
+        } else
+          if (curMsg == .twsIncomingMSG$NEXT_VALID_ID) {
+            tws_con$nextValidId <- process_messages(curMsg, sock_con, eW)
+          } else
+            # print Market data farm messages
+        if (curMsg == .twsIncomingMSG$ERR_MSG) {
+          process_messages(curMsg, sock_con, eW)
+        }
+      } else 
+        break
+    }
+
+    if (length(tws_con$accounts) > 1) {
+      print(glue('Your TWS user name handles {length(tws_con$accounts)} accounts.',
+                 ' Read the documentation with the req_managed_accounts function'))
+    }
+    print(glue("you are connected to account: {tws_con$accounts}"))
+    
     return(tws_con)
 }
 
@@ -179,6 +208,7 @@ tws_disconnect <- function(tws_con) {
     tws_con$server_version <- 0L
     tws_con$clientId <- -1L
     tws_con$nextvalidId <- 0L
+    tws_con$accounts <- NULL
     close(tws_con$con)
     glue("The connection to tws is now closed")
   } else {

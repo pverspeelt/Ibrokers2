@@ -32,7 +32,7 @@ eWrapper <- function() {
       tws_con$connected <- FALSE
     if (error_code %in% c(1101, 1102))
       tws_con$connected <- TRUE
-    glue("TWS message: {error_code} - {error_message}")
+    print(glue("TWS message: {error_code} - {error_message}"))
   }
   
   nextValidId <- function(curMsg, msg, ...) {
