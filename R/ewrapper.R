@@ -46,7 +46,11 @@ eWrapper <- function() {
     accounts
   }
   
-  
+  current_time <- function(curMsg, msg, ...) {
+    count <- counter()
+    version <- as.integer(msg[count()])
+    current_time <- structure(as.numeric(msg[count()]), class="POSIXct")
+  }
   # create eWrapper list ----------
   eW <- list(
     # .Data = .Data,
@@ -55,7 +59,8 @@ eWrapper <- function() {
     # remove.Data = remove.Data,
     error_messages = error_messages,
     nextValidId  =  nextValidId,
-    managed_accounts = managed_accounts
+    managed_accounts = managed_accounts,
+    current_time = current_time
   )
   
   class(eW) <- "eWrapper"
