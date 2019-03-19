@@ -23,7 +23,12 @@ process_messages <- function(curMsg, con, eWrapper, ...)
   if (curMsg == .twsIncomingMSG$MANAGED_ACCTS) {
     msg <- readBin(con, "character", 2L)
     eWrapper$managed_accounts(curMsg, msg, ...)
-  } else {
+  } else
+  if (curMsg == .twsIncomingMSG$CURRENT_TIME) {
+    msg <- readBin(con, "character", 2L)
+    eWrapper$current_time(curMsg, msg, ...)
+  }  
+  else {
     # default message handler
     warning(glue("Unknown incoming message: {curMsg}."), call.=FALSE)
   }
