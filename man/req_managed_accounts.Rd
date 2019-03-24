@@ -4,10 +4,10 @@
 \alias{req_managed_accounts}
 \title{Request managed accounts list}
 \usage{
-req_managed_accounts(con)
+req_managed_accounts(tws_con)
 }
 \arguments{
-\item{con}{a valid tws_con object.}
+\item{tws_con}{a valid tws_con object.}
 }
 \value{
 prints the managed accounts that a TWS user name handles when connected to TWS.

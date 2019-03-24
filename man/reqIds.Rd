@@ -4,19 +4,20 @@
 \alias{reqIds}
 \title{Request next valid Id}
 \usage{
-reqIds(con, numIds = 1L)
+reqIds(tws_con)
 }
 \arguments{
-\item{con}{}
-
-\item{numIds}{}
+\item{tws_con}{a valid tws_con connection object.}
 }
 \value{
-returns the next valid Id that can be used as an order id.
+returns the next valid Id.
 }
 \description{
-Request next valid Id
+Requests the next valid order ID at the current moment.
 }
 \examples{
-example here
+\dontrun{
+tws_con <- tws_connect()
+reqIds(tws_con)
+}
 }

@@ -4,16 +4,17 @@
 \alias{req_current_time}
 \title{Request the current time from the IB server}
 \usage{
-req_current_time(con)
+req_current_time(tws_con)
 }
 \arguments{
-\item{con}{}
+\item{tws_con}{a valid tws connection.}
 }
 \value{
-returns the next valid Id that can be used as an order id.
+returns TWS's current time.
 }
 \description{
-Request the current time from the IB server
+TWS's current time. TWS is synchronized with the server (not local computer) 
+using NTP and this function will receive the current time in TWS.
 }
 \examples{
 example here

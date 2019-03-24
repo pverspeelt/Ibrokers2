@@ -1,47 +1,47 @@
 #' Request next valid Id
+#' 
+#' Requests the next valid order ID at the current moment.
 #'
-#' @param con 
-#' @param numIds 
+#' @param tws_con a valid tws_con connection object.
 #'
-#' @return returns the next valid Id that can be used as an order id.
+#' @return returns the next valid Id.
 #' @export
 #'
 #' @examples
-#' example here
-reqIds <- function(con, numIds = 1L) {
+#' \dontrun{
+#' tws_con <- tws_connect()
+#' reqIds(tws_con)
+#' }
+reqIds <- function(tws_con) {
   
-  if (!is_tws_connection(con)) {    
+  if (!is_tws_connection(tws_con)) {    
     stop("not a 'tws' connection", call. = FALSE)
   }
   
-  if (is.character(numIds)) { 
-    stop(glue::glue("numIds is a character. 
-                    Please use an integer value"))
-  } else if (numIds%%1 == 0) {
-    numIds <- as.integer(numIds) 
-    } else {
-      stop(glue::glue("numIds is not an integer.
-                      Please use an integer value"))
-    } 
-
-  con <- con$con
-  
   VERSION <- "1"
+  numIds <- 1L
   
   out_msg <- c(.twsOutgoingMSG$REQ_IDS,
                VERSION,
                make_field(numIds))
   
-  writeBin(out_msg, con)
+  writeBin(out_msg, tws_con$con)
 
-  ew <- eWrapper()
   
   while (TRUE) {
-    socketSelect(list(con), FALSE, 0.1)
-    curMsg <- readBin(con, "character", 1)
-    nextValidID <- process_messages(curMsg, con, eWrapper = ew)
+    socketSelect(list(tws_con$con), FALSE, 0.1)
+    curMsg <- readBin(tws_con$con, "character", 1)
+    nextValidID <- process_messages(curMsg, tws_con)
     if (curMsg == .twsIncomingMSG$NEXT_VALID_ID)
       break
   }
   return(nextValidID)
+}
+
+
+#' @keywords internal
+processNextValidIdMsg <- function(msg) {
+  count <- counter()
+  version <- as.integer(msg[count()])
+  nextValidID <- as.integer(msg[count()])
 }

@@ -150,7 +150,7 @@ tws_connect <-
     tws_con$port <- port
     tws_con$server_version <- as.integer(SERVER_VERSION)
     tws_con$connected_at <- CONNECTION_TIME
-    tws_con$connected <- is_tws_connection_open(tws_con$con)
+    tws_con$connected <- is_tws_connection_open(tws_con)
     class(tws_con) <- c("tws_con", "environment")
     
     # tws needs an API call now
@@ -160,19 +160,19 @@ tws_connect <-
     Sys.sleep(1)
 
     # read and process connection messages ----------
-    eW <- eWrapper()
+    
     while (TRUE) {
       if (socketSelect(list(sock_con), FALSE, 1)) {
         curMsg <- readBin(sock_con, "character", 1)
         if (curMsg == .twsIncomingMSG$MANAGED_ACCTS) {
-        tws_con$accounts <- process_messages(curMsg, sock_con, eW)
+        tws_con$accounts <- process_messages(curMsg, tws_con)
         } else
           if (curMsg == .twsIncomingMSG$NEXT_VALID_ID) {
-            tws_con$nextValidId <- process_messages(curMsg, sock_con, eW)
+            tws_con$nextValidId <- process_messages(curMsg, tws_con)
           } else
             # print Market data farm messages
         if (curMsg == .twsIncomingMSG$ERR_MSG) {
-          process_messages(curMsg, sock_con, eW)
+          process_messages(curMsg, tws_con)
         }
       } else 
         break

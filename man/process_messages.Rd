@@ -4,14 +4,12 @@
 \alias{process_messages}
 \title{Process messages from TWS}
 \usage{
-process_messages(curMsg, con, eWrapper, ...)
+process_messages(curMsg, tws_con, ...)
 }
 \arguments{
 \item{curMsg}{}
 
-\item{con}{}
-
-\item{eWrapper}{}
+\item{tws_con}{a valid tws connection object}
 
 \item{...}{}
 }
